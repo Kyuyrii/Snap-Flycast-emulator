@@ -1,0 +1,1 @@
+# Snap-Flycast-emulator
