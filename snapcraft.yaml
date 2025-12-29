@@ -1,0 +1,84 @@
+name: flycast-emulator
+base: core24
+version: '2.5'
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+summary: Sega Dreamcast, Naomi and Atomiswave emulator
+description: |
+  Flycast is a multi-platform Sega Dreamcast, Naomi and Atomiswave emulator derived from reicast.
+grade: stable
+confinement: strict
+
+apps:
+  flycast-emulator:
+    command: usr/bin/flycast
+    desktop: usr/share/applications/flycast.desktop
+    common-id: org.flycast.Flycast
+    environment:
+      HOME: $SNAP_REAL_HOME
+    extensions: [kde-neon-6]
+    plugs:
+      - unity7
+      - screen-inhibit-control
+      - audio-playback
+      - network
+      - network-bind
+      - home
+      - removable-media
+      - mount-observe
+      - joystick
+      - bluez
+
+plugs:
+  shared-memory:
+    private: true
+
+layout:
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib:
+    symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/alsa-lib
+
+parts:
+  flycast-app:
+    plugin: cmake
+    source: https://github.com/flyinghead/flycast.git
+    #source-tag: v$SNAPCRAFT_PROJECT_VERSION
+    source-commit: c3275d3c6ffdccffe327a554f65b107568900068
+    build-packages:
+      - libpulse0
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DENABLE_OPT=OFF
+    override-build: |
+      craftctl default 
+      sed -i 's|Name=Flycast|Name=Flycast [NyKyu]|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
+      sed -i 's|Exec=flycast %f|Exec=${SNAP}/usr/bin/flycast %f|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
+      sed -i 's|Icon=flycast|Icon=${SNAP}/usr/share/pixmaps/flycast.png|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
+
+  dependencies:
+    plugin: nil
+    stage-packages:
+      - libasound2t64
+      - libasound2-plugins
+
+  cleanup:
+    after: [flycast-app, dependencies]
+    plugin: nil
+    build-snaps:
+      - mesa-2404
+      - kf6-core24
+    override-prime: |
+      set -eux
+      cd /snap/mesa-2404/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/mesa-2404/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
+
+      cd /snap/kf6-core24/current/usr/lib
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/{} \;
+      cd /snap/kf6-core24/current/usr/share
+      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/share/{} \;
