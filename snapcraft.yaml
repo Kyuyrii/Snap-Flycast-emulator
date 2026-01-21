@@ -1,6 +1,6 @@
 name: flycast-emulator
 base: core24
-version: '2.5'
+version: '2.6'
 platforms:
   amd64:
     build-on: [amd64]
@@ -13,6 +13,7 @@ description: |
   Flycast is a multi-platform Sega Dreamcast, Naomi and Atomiswave emulator derived from reicast.
 grade: stable
 confinement: strict
+icon: flycast.png
 
 apps:
   flycast-emulator:
@@ -46,18 +47,16 @@ parts:
   flycast-app:
     plugin: cmake
     source: https://github.com/flyinghead/flycast.git
-    #source-tag: v$SNAPCRAFT_PROJECT_VERSION
-    source-commit: c3275d3c6ffdccffe327a554f65b107568900068
+    source-tag: v$SNAPCRAFT_PROJECT_VERSION
     build-packages:
       - libpulse0
+      - libudev-dev
     cmake-parameters:
       - -DCMAKE_INSTALL_PREFIX=/usr
       - -DENABLE_OPT=OFF
     override-build: |
       craftctl default 
-      sed -i 's|Name=Flycast|Name=Flycast [NyKyu]|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
-      sed -i 's|Exec=flycast %f|Exec=${SNAP}/usr/bin/flycast %f|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
-      sed -i 's|Icon=flycast|Icon=${SNAP}/usr/share/pixmaps/flycast.png|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
+      sed -i 's|Name=Flycast|Name=Flycast [Kyu]|' $CRAFT_PART_INSTALL/usr/share/applications/flycast.desktop
 
   dependencies:
     plugin: nil
